@@ -1,20 +1,57 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import CreateTodo from '@/components/CreateTodo.vue';
 import TodoList from '@/components/TodoList.vue';
-const todoData = ref([]);
-function saveTodo(title, description)
+//This is a PouchDB class
+import PouchDB from 'pouchdb';
+
+const todoData = ref([])
+async function saveTodo(todoDocument)
 {
-    todoData.value.push({
-        id: todoData.value.length+1,
-        title: title, 
-        description : description,
-        complete: false})
+    if (todoDocument._id == undefined)
+        todoDocument._id =  new Date().getTime()+"";
+    const database = new PouchDB("todoApp")
+    try {
+        await database.put(todoDocument);
+        todoData.value = await loadTodos()    
+    }
+    catch(e) {
+        console.error(e)
+    }
 }
+async function loadTodos()
+{
+    //This represents a database instance
+    const database = new PouchDB("todoApp")
+    
+    var allDocs = await database.allDocs();
+    const todos = []
+    
+    if (allDocs.total_rows != 0) {
+        for (let todoId of allDocs.rows) {
+            const todoDoc = await database.get(todoId.id);
+            todos.push(todoDoc);
+        }
+    }
+    return todos;
+}
+
+onMounted(async () => {
+    try
+    {
+        todoData.value = await loadTodos()
+    } 
+    catch (error)
+    {
+        console.error("Could not load documents")
+    }
+})
+
 function toggleComplete(id) {
     for (const todo of todoData.value) {
-        if (todo.id == id) {
+        if (todo._id == id) {
             todo.complete = !todo.complete
+            saveTodo(todo);
         }
     }
 }

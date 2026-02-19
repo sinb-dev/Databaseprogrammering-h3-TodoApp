@@ -7,7 +7,7 @@ function toggleComplete(id)
 }
 </script>
 <template>
-<div :class="{complete: todo.complete}" class="todo" v-for="todo in props.todoList" @click="toggleComplete(todo.id)">
+<div :class="{complete: todo.complete}" class="todo" v-for="todo in props.todoList" @click="toggleComplete(todo._id)">
     <div class="title">{{ todo.title }}</div>
     <div style="color:gray">{{ todo.description }}</div>    
 </div>

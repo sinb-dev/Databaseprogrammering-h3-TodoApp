@@ -7,7 +7,12 @@ const description = ref("")
 
 function saveTodo()
 {
-    emit("todo-saved", title.value, description.value)
+    const todo = {
+        title : title.value,
+        description: description.value,
+        complete : false
+    }
+    emit("todo-saved", todo)
 
     title.value="";
     description.value="";
